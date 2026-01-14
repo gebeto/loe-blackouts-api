@@ -1,9 +1,9 @@
 import { dayjs } from "../parsers";
 
 import * as ics from "ics";
-import { TimeRange } from "./types";
+import { BlackoutTimeRange } from "./types";
 
-function createEventForGroup(timeRange: TimeRange) {
+function createEventForGroup(timeRange: BlackoutTimeRange) {
   const start = dayjs(timeRange.start)
     .tz("Europe/Kyiv")
     .format("YYYY-M-D-H-m")
@@ -38,7 +38,7 @@ function createEventForGroup(timeRange: TimeRange) {
 }
 
 export function generateIcs(
-  blackoutSchedule: TimeRange[],
+  blackoutSchedule: BlackoutTimeRange[],
   groupTitle?: string
 ): string {
   const events: ics.EventAttributes[] = [];

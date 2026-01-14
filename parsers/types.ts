@@ -11,13 +11,14 @@ dayjs.extend(dayjsTz);
 
 export { dayjs };
 
-export type TimeRange = {
+export type BlackoutTimeRange = {
   group: string;
   start: string;
   end: string;
 };
 
-export type ParserResponse = {
-  date: string;
-  slots: TimeRange[];
+export type BlackoutSchedule = {
+  allSlots: BlackoutTimeRange[];
+  allGroups: string[];
+  slotsForGroup: Record<string, BlackoutTimeRange[]>;
 };

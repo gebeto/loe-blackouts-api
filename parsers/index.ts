@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ParserResponse } from "./types";
+import { BlackoutSchedule } from "./types";
 
 import { parseLOEBlackoutsSchedule } from "./lviv";
 
@@ -8,7 +8,7 @@ export { generateIcs } from "./ics";
 
 export const availableParsers = ["test", "lviv"] as const;
 export type ParserKey = (typeof availableParsers)[number];
-export const parsers: Record<ParserKey, () => Promise<ParserResponse[]>> = {
+export const parsers: Record<ParserKey, () => Promise<BlackoutSchedule>> = {
   lviv: parseLOEBlackoutsSchedule,
   test: parseLOEBlackoutsSchedule,
 };

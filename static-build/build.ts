@@ -14,6 +14,7 @@ const HOST = process.env.HOST || "localhost:3000";
   );
 
   const rootDir = path.resolve(__dirname, "..", "dist");
+  await fs.rm(rootDir, { recursive: true, force: true });
   await fs.mkdir(rootDir, { recursive: true });
   await fs.writeFile(
     path.join(rootDir, "index.html"),
@@ -25,12 +26,17 @@ const HOST = process.env.HOST || "localhost:3000";
     const cityDirectory = path.join(rootDir, city);
     await fs.mkdir(cityDirectory, { recursive: true });
 
-    const response = await parser();
-    const allSlots = response.map((d) => d.slots).flat();
-    const allGroups = Array.from(new Set(allSlots.map((s) => s.group)));
+    const schedule = await parser();
     fs.writeFile(
       path.join(cityDirectory, "schedule.json"),
-      JSON.stringify(allSlots, null, 2),
+      JSON.stringify(
+        {
+          allGroups: schedule.allGroups,
+          slotsForGroup: schedule.slotsForGroup,
+        },
+        null,
+        2
+      ),
       "utf-8"
     );
 
@@ -40,7 +46,7 @@ const HOST = process.env.HOST || "localhost:3000";
         title: city,
         slots: [
           { title: "All", url: `webcal://${HOST}/${city}/all.ics` },
-          ...allGroups.map((g) => {
+          ...schedule.allGroups.map((g) => {
             return {
               title: g,
               url: `webcal://${HOST}/${city}/${g}.ics`,
@@ -53,17 +59,14 @@ const HOST = process.env.HOST || "localhost:3000";
 
     fs.writeFile(
       path.join(cityDirectory, `all.ics`),
-      generateIcs(allSlots),
+      generateIcs(schedule.allSlots),
       "utf-8"
     );
 
-    for (const group of allGroups) {
+    for (const group of schedule.allGroups) {
       fs.writeFile(
         path.join(cityDirectory, `${group}.ics`),
-        generateIcs(
-          allSlots.filter((s) => s.group === group),
-          group
-        ),
+        generateIcs(schedule.slotsForGroup[group] ?? [], group),
         "utf-8"
       );
     }
