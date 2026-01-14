@@ -8,7 +8,7 @@ export { generateIcs } from "./ics";
 
 export const availableParsers = ["test", "lviv"] as const;
 export type ParserKey = (typeof availableParsers)[number];
-export const parsers: Record<ParserKey, () => Promise<ParserResponse>> = {
+export const parsers: Record<ParserKey, () => Promise<ParserResponse[]>> = {
   lviv: parseLOEBlackoutsSchedule,
   test: parseLOEBlackoutsSchedule,
 };

@@ -12,11 +12,12 @@ dayjs.extend(dayjsTz);
 export { dayjs };
 
 export type TimeRange = {
+  group: string;
   start: string;
   end: string;
 };
 
 export type ParserResponse = {
   date: string;
-  groups: Record<string, TimeRange[]>;
+  slots: TimeRange[];
 };
