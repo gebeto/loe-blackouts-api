@@ -29,11 +29,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       start: start,
       end: end,
       title: `${group} Відключення світла`,
+      alarms: [
+        {
+          action: "display",
+          description: "Відключення світла скоро почнеться",
+          trigger: { minutes: 30, before: true },
+          repeat: 1,
+          attach: "Glass",
+        },
+      ],
     };
     events.push(event);
   });
 
   res.setHeader("Content-Type", "text/calendar; charset=utf-8");
+  // res.setHeader("Content-Type", "text/plain; charset=utf-8");
   return res.send(
     ics.createEvents(events, {
       calName: `${group} Відключення світла`,
