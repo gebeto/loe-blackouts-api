@@ -44,6 +44,12 @@ const HOST = process.env.HOST || "localhost:3000";
       "utf-8"
     );
 
+    fs.writeFile(
+      path.join(cityDirectory, `all.ics`),
+      generateIcs(response),
+      "utf-8"
+    );
+
     for (const group of Object.keys(response.groups)) {
       fs.writeFile(
         path.join(cityDirectory, `${group}.ics`),
