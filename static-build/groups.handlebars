@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Відключення {{title}} ICS</title>
+  <style>
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .list a {
+      font-size: 20px;
+      padding: 20px;
+      text-decoration: none;
+      color: inherit;
+      border-radius: 4px;
+      border: 2px solid black;
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="list">
+    <a href="../index.html">
+      ⬅️ Back
+    </a>
+    {{#each groups}}
+        <a href="{{this.url}}">
+          {{this.title}}
+        </a>
+    {{/each}}
+  </div>
+</body>
+
+</html>
