@@ -10,10 +10,12 @@ export function generateIcs(
   const events: ics.EventAttributes[] = [];
   blackoutSchedule.groups[group].forEach((timeRange) => {
     const start = dayjs(timeRange.start)
+      .tz("Europe/Kyiv")
       .format("YYYY-M-D-H-m")
       .split("-")
       .map((a) => parseInt(a)) as ics.DateArray;
     const end = dayjs(timeRange.end)
+      .tz("Europe/Kyiv")
       .format("YYYY-M-D-H-m")
       .split("-")
       .map((a) => parseInt(a)) as ics.DateArray;
