@@ -36,10 +36,13 @@ const HOST = process.env.HOST || "localhost:3000";
       path.join(cityDirectory, "index.html"),
       groupsTemplate({
         title: city,
-        groups: Object.keys(response.groups).map((g) => ({
-          title: g,
-          url: `webcal://${HOST}/${city}/${g}.ics`,
-        })),
+        groups: [
+          { title: "All", url: `webcal://${HOST}/${city}/all.ics` },
+          ...Object.keys(response.groups).map((g) => ({
+            title: g,
+            url: `webcal://${HOST}/${city}/${g}.ics`,
+          })),
+        ],
       }),
       "utf-8"
     );
