@@ -5,7 +5,11 @@ import * as ics from "ics";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const events: ics.EventAttributes[] = [];
-  const { group, city } = parserSchema.parse(req.query);
+  const validation = parserSchema.safeParse(req.query);
+  if (!validation.success) {
+    return res.status(400).json(validation.error.issues);
+  }
+  const { group, city } = validation.data;
   const response = await parsers[city]();
   response.groups[group].forEach((timeRange) => {
     const start = dayjs(timeRange.start)
