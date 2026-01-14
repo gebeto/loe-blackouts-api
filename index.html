@@ -350,16 +350,28 @@
     </a>
 
     <script>
-      const subscriptionLink = document.createElement("a");
-      subscriptionLink.className = "control";
-      const url =
-        "webcal://" +
-        window.location.href.split("://")[1] +
-        "api/blackouts.ics";
-      subscriptionLink.href = url;
-      subscriptionLink.innerHTML =
-        "<label>Subscribe to Blackouts Calendar</label>";
-      document.body.appendChild(subscriptionLink);
+      [
+        "1.1",
+        "1.2",
+        "2.1",
+        "2.2",
+        "3.1",
+        "3.2",
+        "4.1",
+        "4.2",
+        "5.1",
+        "5.2",
+      ].map((group) => {
+        const subscriptionLink = document.createElement("a");
+        subscriptionLink.className = "control";
+        const url =
+          "webcal://" +
+          window.location.href.split("://")[1] +
+          `api/blackouts.ics?group=${group}`;
+        subscriptionLink.href = url;
+        subscriptionLink.innerHTML = `<label>Subscribe to ${group}</label>`;
+        document.body.appendChild(subscriptionLink);
+      });
     </script>
   </body>
 </html>

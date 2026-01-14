@@ -8,7 +8,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const events: ics.EventAttributes[] = [];
 
   const response = await parseLOEBlackoutsSchedule();
-  response.data["1.1"].forEach((timeRange) => {
+  const group: string = Array.isArray(req.query.group)
+    ? req.query.group[0]
+    : req.query.group ?? "1.1";
+  response.data[group].forEach((timeRange) => {
     const start = dayjs
       .tz(`${response.date}T${timeRange.start}:00`, "Europe/Kyiv")
       .format("YYYY-M-D-H-m")
@@ -25,11 +28,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       startOutputType: "local",
       start: start,
       end: end,
-      title: `Відключення 1.1`,
+      title: `${group} Відключення світла`,
     };
     events.push(event);
   });
 
   res.setHeader("Content-Type", "text/calendar; charset=utf-8");
-  return res.send(ics.createEvents(events).value);
+  return res.send(
+    ics.createEvents(events, {
+      calName: `${group} Відключення світла`,
+    }).value
+  );
 }
