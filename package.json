@@ -2,9 +2,13 @@
   "repository": "https://github.com/gebeto/loe-blackouts-api.git",
   "license": "MIT",
   "private": true,
+  "scripts": {
+    "build-static": "tsx buildStatic.ts"
+  },
   "devDependencies": {
     "@types/node": "^17.0.42",
     "@vercel/node": "^2.9.6",
+    "tsx": "^4.21.0",
     "typescript": "^4.9.5"
   },
   "dependencies": {

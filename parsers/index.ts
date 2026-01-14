@@ -4,6 +4,7 @@ import { ParserResponse } from "./types";
 import { parseLOEBlackoutsSchedule } from "./lviv";
 
 export { dayjs } from "./types";
+export { generateIcs } from "./ics";
 
 export const availableParsers = ["test", "lviv"] as const;
 export type ParserKey = (typeof availableParsers)[number];
