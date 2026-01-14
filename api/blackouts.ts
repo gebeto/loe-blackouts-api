@@ -1,7 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { parseLOEBlackoutsSchedule } from "../parser";
+import { parsers, parserSchema } from "../parsers";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const response = await parseLOEBlackoutsSchedule();
+  const { city } = parserSchema.parse(req.query);
+  const response = await parsers[city]();
   return res.json(response);
 }

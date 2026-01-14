@@ -9,6 +9,6 @@
     "skipLibCheck": true,
     "types": ["node"],
   },
-  "include": ["api/**/*.ts"],
+  "include": ["api/**/*.ts", "parsers/**/*.ts"],
   "exclude": ["node_modules", "dist"],
 }
