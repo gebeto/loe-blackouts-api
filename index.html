@@ -348,5 +348,18 @@
     <a class="control" href="/api/blackouts">
       <label> Go to Blackouts endpoint</label>
     </a>
+
+    <script>
+      const subscriptionLink = document.createElement("a");
+      subscriptionLink.className = "control";
+      const url =
+        "webcal://" +
+        window.location.href.split("://")[1] +
+        "api/blackouts.ics";
+      subscriptionLink.href = url;
+      subscriptionLink.innerHTML =
+        "<label>Subscribe to Blackouts Calendar</label>";
+      document.body.appendChild(subscriptionLink);
+    </script>
   </body>
 </html>
