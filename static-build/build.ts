@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
-import { parsers, generateIcs } from "../parsers";
+import { parsers, generateIcs, availableParsersLabels } from "../parsers";
 import Handlebars from "handlebars";
 
 const HOST = process.env.HOST || "localhost:3000";
@@ -18,7 +18,12 @@ const HOST = process.env.HOST || "localhost:3000";
   await fs.mkdir(rootDir, { recursive: true });
   await fs.writeFile(
     path.join(rootDir, "index.html"),
-    indexTemplate({ cities: Object.keys(parsers) }),
+    indexTemplate({
+      cities: Object.keys(parsers).map((city) => ({
+        key: city,
+        label: availableParsersLabels[city] ?? city,
+      })),
+    }),
     "utf-8"
   );
 

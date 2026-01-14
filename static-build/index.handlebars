@@ -29,8 +29,8 @@
 <body>
   <div class="list">
     {{#each cities}}
-      <a href="{{this}}/index.html">
-        {{this}} {{domain}}
+      <a href="{{this.key}}/index.html">
+        {{this.label}}
       </a>
     {{/each}}
   </div>

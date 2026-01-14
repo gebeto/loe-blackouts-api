@@ -7,6 +7,10 @@ export { dayjs } from "./types";
 export { generateIcs } from "./ics";
 
 export const availableParsers = ["test", "lviv"] as const;
+export const availableParsersLabels: Record<string, string> = {
+  lviv: "Львів",
+  test: "Тестовий парсер",
+};
 export type ParserKey = (typeof availableParsers)[number];
 export const parsers: Record<ParserKey, () => Promise<BlackoutSchedule>> = {
   lviv: parseLOEBlackoutsSchedule,
