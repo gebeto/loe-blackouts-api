@@ -1,23 +1,32 @@
 import { z } from "zod";
-import { BlackoutSchedule } from "./types";
+import { UnionToTuple } from "type-fest";
 
 import { parseLOEBlackoutsSchedule } from "./lviv";
 
 export { dayjs } from "./types";
 export { generateIcs } from "./ics";
 
-export const availableParsers = ["test", "lviv"] as const;
-export const availableParsersLabels: Record<string, string> = {
-  lviv: "Львів",
-  test: "Тестовий парсер",
+export const availableParsers = {
+  lviv: {
+    key: "lviv",
+    label: "Львів",
+    parser: parseLOEBlackoutsSchedule,
+    visible: true,
+  },
+  test: {
+    key: "test",
+    label: "Тестовий парсер",
+    parser: parseLOEBlackoutsSchedule,
+    visible: false,
+  },
 };
-export type ParserKey = (typeof availableParsers)[number];
-export const parsers: Record<ParserKey, () => Promise<BlackoutSchedule>> = {
-  lviv: parseLOEBlackoutsSchedule,
-  test: parseLOEBlackoutsSchedule,
-};
+export type ParserKey = keyof typeof availableParsers;
+
+export const availableParserKeys = Object.keys(
+  availableParsers,
+) as UnionToTuple<ParserKey>;
 
 export const parserSchema = z.object({
   group: z.string().optional().default("1.1"),
-  city: z.enum(availableParsers).optional().default("lviv"),
+  city: z.enum(availableParserKeys).optional().default("lviv"),
 });

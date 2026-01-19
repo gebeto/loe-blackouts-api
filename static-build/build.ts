@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
-import { parsers, generateIcs, availableParsersLabels } from "../parsers";
+import { generateIcs, availableParsers, ParserKey } from "../parsers";
 import Handlebars from "handlebars";
 
 const HOST = process.env.HOST || "localhost:3000";
@@ -45,19 +45,21 @@ const buildStaticFiles = async () => {
   await fs.writeFile(
     path.join(rootDir, "index.html"),
     indexTemplate({
-      cities: Object.keys(parsers).map((city) => ({
-        key: city,
-        label: availableParsersLabels[city] ?? city,
-      })),
+      cities: (Object.keys(availableParsers) as ParserKey[])
+        .filter((c) => availableParsers[c]?.visible === true)
+        .map((city) => ({
+          key: city,
+          label: availableParsers[city]?.label ?? city,
+        })),
     }),
     "utf-8",
   );
 
-  for (const [city, parser] of Object.entries(parsers)) {
-    const cityDirectory = path.join(rootDir, city);
+  for (const [parserKey, parser] of Object.entries(availableParsers)) {
+    const cityDirectory = path.join(rootDir, parserKey);
     await fs.mkdir(cityDirectory, { recursive: true });
 
-    const schedule = await parser();
+    const schedule = await parser.parser();
     fs.writeFile(
       path.join(cityDirectory, "schedule.json"),
       JSON.stringify(
@@ -74,13 +76,13 @@ const buildStaticFiles = async () => {
     fs.writeFile(
       path.join(cityDirectory, "index.html"),
       groupsTemplate({
-        title: city,
+        title: parserKey,
         slots: [
-          { title: "All", url: `webcal://${HOST}/${city}/all.ics` },
+          { title: "All", url: `webcal://${HOST}/${parserKey}/all.ics` },
           ...schedule.allGroups.map((g) => {
             return {
               title: g,
-              url: `webcal://${HOST}/${city}/${g}.ics`,
+              url: `webcal://${HOST}/${parserKey}/${g}.ics`,
             };
           }),
         ],
