@@ -12,21 +12,25 @@ class LOEParser {
     return {
       allSlots: slots,
       allGroups: Array.from(new Set(slots.map((s) => s.group))),
-      slotsForGroup: slots.reduce((acc, slot) => {
-        if (!acc[slot.group]) {
-          acc[slot.group] = [];
-        }
-        acc[slot.group].push(slot);
-        return acc;
-      }, {} as BlackoutSchedule["slotsForGroup"]),
+      slotsForGroup: slots.reduce(
+        (acc, slot) => {
+          if (!acc[slot.group]) {
+            acc[slot.group] = [];
+          }
+          acc[slot.group].push(slot);
+          return acc;
+        },
+        {} as BlackoutSchedule["slotsForGroup"],
+      ),
     };
   }
 
   async fetchData() {
     const response = await fetch(
-      "https://api.loe.lviv.ua/api/menus?page=1&type=photo-grafic"
+      "https://api.loe.lviv.ua/api/menus?page=1&type=photo-grafic",
     );
     const responseData = await response.json();
+    console.log(" >>> LOE API response:", responseData);
 
     return {
       today: responseData["hydra:member"][0]["menuItems"][0]["rawHtml"] ?? "",
@@ -38,7 +42,7 @@ class LOEParser {
   parseHtmlDataToObject(htmlData: string): BlackoutTimeRange[] {
     const parsed = parse(htmlData);
     const parsedRows = [...parsed.querySelectorAll("p")].map(
-      (p) => p.textContent
+      (p) => p.textContent,
     );
     if (!parsedRows.length) {
       return [];
@@ -47,7 +51,7 @@ class LOEParser {
     const titleSplit = title.split(" ");
     const blackoutDate = dayjs(
       titleSplit[titleSplit.length - 1],
-      "DD.MM.YYYY"
+      "DD.MM.YYYY",
     ).format("YYYY-MM-DD");
     return items
       .map((item) => {
@@ -67,7 +71,7 @@ class LOEParser {
   parseTimeRange(
     group: string,
     date: string,
-    timeRange: string
+    timeRange: string,
   ): BlackoutTimeRange {
     const matches = /з\s(\d\d:\d\d)\sдо\s(\d\d:\d\d)/.exec(timeRange);
     if (matches) {
