@@ -5,12 +5,38 @@ import Handlebars from "handlebars";
 
 const HOST = process.env.HOST || "localhost:3000";
 
-(async () => {
+const asyncWait = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
+const handleRetries = async (
+  callback: () => Promise<void>,
+  delayMs: number,
+  retriesCount: number,
+) => {
+  for (let attempt = 1; attempt <= retriesCount; attempt++) {
+    try {
+      await callback();
+      break;
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(`Attempt ${attempt} failed with error: ${error.message}`);
+        if (attempt === retriesCount) {
+          console.error("All retry attempts failed.");
+          throw error;
+        }
+      }
+    }
+    console.log(`Waiting for ${delayMs}ms before retrying...`);
+    await asyncWait(delayMs);
+  }
+};
+
+const buildStaticFiles = async () => {
   const indexTemplate = Handlebars.compile(
-    await fs.readFile(path.join(__dirname, "index.handlebars"), "utf-8")
+    await fs.readFile(path.join(__dirname, "index.handlebars"), "utf-8"),
   );
   const groupsTemplate = Handlebars.compile(
-    await fs.readFile(path.join(__dirname, "groups.handlebars"), "utf-8")
+    await fs.readFile(path.join(__dirname, "groups.handlebars"), "utf-8"),
   );
 
   const rootDir = path.resolve(__dirname, "..", "dist");
@@ -24,7 +50,7 @@ const HOST = process.env.HOST || "localhost:3000";
         label: availableParsersLabels[city] ?? city,
       })),
     }),
-    "utf-8"
+    "utf-8",
   );
 
   for (const [city, parser] of Object.entries(parsers)) {
@@ -40,9 +66,9 @@ const HOST = process.env.HOST || "localhost:3000";
           slotsForGroup: schedule.slotsForGroup,
         },
         null,
-        2
+        2,
       ),
-      "utf-8"
+      "utf-8",
     );
 
     fs.writeFile(
@@ -59,21 +85,31 @@ const HOST = process.env.HOST || "localhost:3000";
           }),
         ],
       }),
-      "utf-8"
+      "utf-8",
     );
 
     fs.writeFile(
       path.join(cityDirectory, `all.ics`),
       generateIcs(schedule.allSlots),
-      "utf-8"
+      "utf-8",
     );
 
     for (const group of schedule.allGroups) {
       fs.writeFile(
         path.join(cityDirectory, `${group}.ics`),
         generateIcs(schedule.slotsForGroup[group] ?? [], group),
-        "utf-8"
+        "utf-8",
       );
     }
   }
+};
+
+(async () => {
+  await handleRetries(
+    async () => {
+      await buildStaticFiles();
+    },
+    20000,
+    3,
+  );
 })();
