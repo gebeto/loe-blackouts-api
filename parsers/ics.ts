@@ -20,7 +20,7 @@ function createEventForGroup(timeRange: BlackoutTimeRange) {
     startOutputType: "local",
     start: start,
     end: end,
-    busyStatus: "BUSY",
+    busyStatus: "FREE",
     transp: "TRANSPARENT",
     title: `${timeRange.group} Відключення світла`,
     alarms: [
@@ -63,11 +63,11 @@ export function generateEvents(group: BlackoutGroup) {
 }
 
 export function generateIcs(
+  groupName: string,
   events: ics.EventAttributes[],
-  groupTitle: string,
 ): string {
   const result = ics.createEvents(events, {
-    calName: `${groupTitle} Відключення світла`,
+    calName: `${groupName} Відключення світла`,
   }).value;
 
   return result ?? "";

@@ -71,38 +71,26 @@ const buildStaticFiles = async () => {
       path.join(cityDirectory, "index.html"),
       groupsTemplate({
         title: parserKey,
-        slots: [
-          // { title: "All", url: `webcal://${HOST}/${parserKey}/all.ics` },
-          ...schedule.today.map((g) => {
-            return {
-              title: g.group,
-              url: `webcal://${HOST}/${parserKey}/${g.group}.ics`,
-            };
-          }),
-        ],
+        slots: schedule.today.map((g) => {
+          return {
+            title: g.group,
+            url: `webcal://${HOST}/${parserKey}/${g.group}.ics`,
+          };
+        }),
       }),
       "utf-8",
     );
 
-    // fs.writeFile(
-    //   path.join(cityDirectory, `all.ics`),
-    //   generateIcs(schedule.allSlots),
-    //   "utf-8",
-    // );
-
-    for (const group of schedule.today) {
+    for (const today of schedule.today) {
       const tomorrowGroup = schedule.tomorrow.find(
-        (g) => g.group === group.group,
+        (g) => g.group === today.group,
       );
       fs.writeFile(
-        path.join(cityDirectory, `${group.group}.ics`),
-        generateIcs(
-          [
-            ...generateEvents(group),
-            ...(tomorrowGroup ? generateEvents(tomorrowGroup) : []),
-          ],
-          group.group,
-        ),
+        path.join(cityDirectory, `${today.group}.ics`),
+        generateIcs(today.group, [
+          ...generateEvents(today),
+          ...(tomorrowGroup ? generateEvents(tomorrowGroup) : []),
+        ]),
         "utf-8",
       );
     }
