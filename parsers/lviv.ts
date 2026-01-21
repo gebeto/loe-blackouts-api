@@ -30,16 +30,34 @@ class LOEParser {
       "https://api.loe.lviv.ua/api/menus?page=1&type=photo-grafic",
     );
     const responseData = await response.json();
-    console.log(
-      " >>> LOE API response:",
-      JSON.stringify(responseData, undefined, 2),
-    );
 
-    return {
-      today: responseData["hydra:member"][0]["menuItems"][0]["rawHtml"] ?? "",
-      tomorrow:
-        responseData["hydra:member"][0]["menuItems"][2]["rawHtml"] ?? "",
-    };
+    try {
+      if (Array.isArray(responseData)) {
+        return {
+          today: responseData[0]["menuItems"][0]["rawHtml"] ?? "",
+          tomorrow: responseData[0]["menuItems"][2]["rawHtml"] ?? "",
+        };
+      } else if ("hydra:member" in responseData) {
+        return {
+          today:
+            responseData["hydra:member"][0]["menuItems"][0]["rawHtml"] ?? "",
+          tomorrow:
+            responseData["hydra:member"][0]["menuItems"][2]["rawHtml"] ?? "",
+        };
+      }
+
+      return {
+        today: responseData["hydra:member"][0]["menuItems"][0]["rawHtml"] ?? "",
+        tomorrow:
+          responseData["hydra:member"][0]["menuItems"][2]["rawHtml"] ?? "",
+      };
+    } catch (error) {
+      console.error(
+        "Error parsing LOE API response:",
+        JSON.stringify(responseData, undefined, 2),
+      );
+      throw error;
+    }
   }
 
   parseHtmlDataToObject(htmlData: string): BlackoutTimeRange[] {
@@ -58,13 +76,18 @@ class LOEParser {
     ).format("YYYY-MM-DD");
     return items
       .map((item) => {
+        if (item.includes("Електроенергія є")) {
+          return [];
+        }
         const [groupRaw, _times] = item.split("Електроенергії немає");
         const group = /\d\.\d/.exec(groupRaw)?.[0] ?? "";
         const times = _times
           .replace(/\./g, "")
           .trim()
           .split(", ")
-          .map((time) => this.parseTimeRange(group, blackoutDate, time.trim()))
+          .map((time: string) =>
+            this.parseTimeRange(group, blackoutDate, time.trim()),
+          )
           .filter((i) => i.start && i.end);
         return times;
       })
