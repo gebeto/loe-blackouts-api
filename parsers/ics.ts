@@ -49,7 +49,6 @@ export function generateEvents(group: BlackoutGroup) {
         uid: startObj.format("YYYY-MM-DD") + "@" + "loe-blackouts",
         startOutputType: "local",
         start: start,
-        // end: start,
         duration: { days: 1 },
         busyStatus: "FREE",
         transp: "TRANSPARENT",
