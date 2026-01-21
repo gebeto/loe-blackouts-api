@@ -30,7 +30,10 @@ class LOEParser {
       "https://api.loe.lviv.ua/api/menus?page=1&type=photo-grafic",
     );
     const responseData = await response.json();
-    console.log(" >>> LOE API response:", responseData);
+    console.log(
+      " >>> LOE API response:",
+      JSON.stringify(responseData, undefined, 2),
+    );
 
     return {
       today: responseData["hydra:member"][0]["menuItems"][0]["rawHtml"] ?? "",
