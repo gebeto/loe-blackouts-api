@@ -1,27 +1,32 @@
 import { parse } from "node-html-parser";
-import { BlackoutTimeRange, dayjs, BlackoutSchedule } from "./types";
+import {
+  BlackoutTimeRange,
+  dayjs,
+  BlackoutSchedule,
+  BlackoutGroup,
+} from "./types";
 
 class LOEParser {
   async parse(): Promise<BlackoutSchedule> {
     const { today, tomorrow } = await this.fetchData();
-    const slots = [
-      this.parseHtmlDataToObject(today),
-      this.parseHtmlDataToObject(tomorrow),
-    ].flat();
+    const todayGroups = this.parseHtmlDataToObject(today);
+    const tomorrowGroups = this.parseHtmlDataToObject(tomorrow);
 
     return {
-      allSlots: slots,
-      allGroups: Array.from(new Set(slots.map((s) => s.group))),
-      slotsForGroup: slots.reduce(
-        (acc, slot) => {
-          if (!acc[slot.group]) {
-            acc[slot.group] = [];
-          }
-          acc[slot.group].push(slot);
-          return acc;
-        },
-        {} as BlackoutSchedule["slotsForGroup"],
-      ),
+      today: todayGroups,
+      tomorrow: tomorrowGroups,
+      // allSlots: groups.map((g) => g.timeRanges).flat(),
+      // allGroups: groups.map((g) => g.group),
+      // slotsForGroup: groups.reduce(
+      //   (acc, group) => {
+      //     if (!acc[group.group]) {
+      //       acc[group.group] = [];
+      //     }
+      //     acc[group.group] = group.timeRanges;
+      //     return acc;
+      //   },
+      //   {} as BlackoutSchedule["slotsForGroup"],
+      // ),
     };
   }
 
@@ -60,7 +65,7 @@ class LOEParser {
     }
   }
 
-  parseHtmlDataToObject(htmlData: string): BlackoutTimeRange[] {
+  parseHtmlDataToObject(htmlData: string): BlackoutGroup[] {
     const parsed = parse(htmlData);
     const parsedRows = [...parsed.querySelectorAll("p")].map(
       (p) => p.textContent,
@@ -74,24 +79,33 @@ class LOEParser {
       titleSplit[titleSplit.length - 1],
       "DD.MM.YYYY",
     ).format("YYYY-MM-DD");
-    return items
-      .map((item) => {
-        if (item.includes("Електроенергія є")) {
-          return [];
-        }
-        const [groupRaw, _times] = item.split("Електроенергії немає");
+    const groups = items.map((item) => {
+      if (item.includes("Електроенергія є")) {
+        const [groupRaw, _times] = item.split("Електроенергія є");
         const group = /\d\.\d/.exec(groupRaw)?.[0] ?? "";
-        const times = _times
-          .replace(/\./g, "")
-          .trim()
-          .split(", ")
-          .map((time: string) =>
-            this.parseTimeRange(group, blackoutDate, time.trim()),
-          )
-          .filter((i) => i.start && i.end);
-        return times;
-      })
-      .flat();
+        return {
+          group: group,
+          date: blackoutDate,
+          timeRanges: [],
+        } satisfies BlackoutGroup;
+      }
+      const [groupRaw, _times] = item.split("Електроенергії немає");
+      const group = /\d\.\d/.exec(groupRaw)?.[0] ?? "";
+      const times = _times
+        .replace(/\./g, "")
+        .trim()
+        .split(", ")
+        .map((time: string) =>
+          this.parseTimeRange(group, blackoutDate, time.trim()),
+        )
+        .filter((i) => i.start && i.end);
+      return {
+        group: group,
+        date: blackoutDate,
+        timeRanges: times,
+      } satisfies BlackoutGroup;
+    });
+    return groups;
   }
 
   parseTimeRange(

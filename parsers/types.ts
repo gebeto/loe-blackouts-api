@@ -17,8 +17,17 @@ export type BlackoutTimeRange = {
   end: string;
 };
 
+export type BlackoutGroup = {
+  group: string;
+  date: string;
+  timeRanges: BlackoutTimeRange[];
+};
+
 export type BlackoutSchedule = {
-  allSlots: BlackoutTimeRange[];
-  allGroups: string[];
-  slotsForGroup: Record<string, BlackoutTimeRange[]>;
+  today: BlackoutGroup[];
+  tomorrow: BlackoutGroup[];
+  // groups: BlackoutGroup[];
+  // allSlots: BlackoutTimeRange[];
+  // allGroups: string[];
+  // slotsForGroup: Record<string, BlackoutTimeRange[]>;
 };

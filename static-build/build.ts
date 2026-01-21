@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import { generateIcs, availableParsers, ParserKey } from "../parsers";
 import Handlebars from "handlebars";
+import { generateEvents } from "../parsers/ics";
 
 const HOST = process.env.HOST || "localhost:3000";
 
@@ -62,14 +63,7 @@ const buildStaticFiles = async () => {
     const schedule = await parser.parser();
     fs.writeFile(
       path.join(cityDirectory, "schedule.json"),
-      JSON.stringify(
-        {
-          allGroups: schedule.allGroups,
-          slotsForGroup: schedule.slotsForGroup,
-        },
-        null,
-        2,
-      ),
+      JSON.stringify(schedule, null, 2),
       "utf-8",
     );
 
@@ -78,11 +72,11 @@ const buildStaticFiles = async () => {
       groupsTemplate({
         title: parserKey,
         slots: [
-          { title: "All", url: `webcal://${HOST}/${parserKey}/all.ics` },
-          ...schedule.allGroups.map((g) => {
+          // { title: "All", url: `webcal://${HOST}/${parserKey}/all.ics` },
+          ...schedule.today.map((g) => {
             return {
-              title: g,
-              url: `webcal://${HOST}/${parserKey}/${g}.ics`,
+              title: g.group,
+              url: `webcal://${HOST}/${parserKey}/${g.group}.ics`,
             };
           }),
         ],
@@ -90,16 +84,25 @@ const buildStaticFiles = async () => {
       "utf-8",
     );
 
-    fs.writeFile(
-      path.join(cityDirectory, `all.ics`),
-      generateIcs(schedule.allSlots),
-      "utf-8",
-    );
+    // fs.writeFile(
+    //   path.join(cityDirectory, `all.ics`),
+    //   generateIcs(schedule.allSlots),
+    //   "utf-8",
+    // );
 
-    for (const group of schedule.allGroups) {
+    for (const group of schedule.today) {
+      const tomorrowGroup = schedule.tomorrow.find(
+        (g) => g.group === group.group,
+      );
       fs.writeFile(
-        path.join(cityDirectory, `${group}.ics`),
-        generateIcs(schedule.slotsForGroup[group] ?? [], group),
+        path.join(cityDirectory, `${group.group}.ics`),
+        generateIcs(
+          [
+            ...generateEvents(group),
+            ...(tomorrowGroup ? generateEvents(tomorrowGroup) : []),
+          ],
+          group.group,
+        ),
         "utf-8",
       );
     }

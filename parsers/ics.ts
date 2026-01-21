@@ -1,7 +1,7 @@
 import { dayjs } from "../parsers";
 
 import * as ics from "ics";
-import { BlackoutTimeRange } from "./types";
+import { BlackoutGroup, BlackoutTimeRange } from "./types";
 
 function createEventForGroup(timeRange: BlackoutTimeRange) {
   const start = dayjs(timeRange.start)
@@ -37,19 +37,37 @@ function createEventForGroup(timeRange: BlackoutTimeRange) {
   return event;
 }
 
-export function generateIcs(
-  blackoutSchedule: BlackoutTimeRange[],
-  groupTitle?: string
-): string {
-  const events: ics.EventAttributes[] = [];
-  blackoutSchedule.forEach((timeRange) => {
-    events.push(createEventForGroup(timeRange));
+export function generateEvents(group: BlackoutGroup) {
+  if (group.timeRanges.length === 0) {
+    const startObj = dayjs(group.date, "YYYY-MM-DD");
+    const start = startObj
+      .format("YYYY-M-D")
+      .split("-")
+      .map((a) => parseInt(a)) as ics.DateArray;
+    return [
+      {
+        uid: startObj.format("YYYY-MM-DD") + "@" + "loe-blackouts",
+        startOutputType: "local",
+        start: start,
+        // end: start,
+        duration: { days: 1 },
+        busyStatus: "FREE",
+        transp: "TRANSPARENT",
+        title: `${group.group} Світло НЕ відключається`,
+      } satisfies ics.EventAttributes,
+    ];
+  }
+  return group.timeRanges.map((timeRange) => {
+    return createEventForGroup(timeRange);
   });
+}
 
+export function generateIcs(
+  events: ics.EventAttributes[],
+  groupTitle: string,
+): string {
   const result = ics.createEvents(events, {
-    calName: groupTitle
-      ? `${groupTitle} Відключення світла`
-      : "Відключення світла",
+    calName: `${groupTitle} Відключення світла`,
   }).value;
 
   return result ?? "";
