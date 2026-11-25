@@ -33,6 +33,10 @@ const handleRetries = async (
 };
 
 const buildStaticFiles = async () => {
+  Handlebars.registerPartial(
+    "styles",
+    await fs.readFile(path.join(__dirname, "styles.handlebars"), "utf-8"),
+  );
   const indexTemplate = Handlebars.compile(
     await fs.readFile(path.join(__dirname, "index.handlebars"), "utf-8"),
   );
@@ -46,11 +50,13 @@ const buildStaticFiles = async () => {
   await fs.writeFile(
     path.join(rootDir, "index.html"),
     indexTemplate({
+      host: HOST,
       cities: (Object.keys(availableParsers) as ParserKey[])
         .filter((c) => availableParsers[c]?.visible === true)
-        .map((city) => ({
+        .map((city, i) => ({
           key: city,
           label: availableParsers[city]?.label ?? city,
+          shortcut: i + 1,
         })),
     }),
     "utf-8",
@@ -70,7 +76,10 @@ const buildStaticFiles = async () => {
     fs.writeFile(
       path.join(cityDirectory, "index.html"),
       groupsTemplate({
-        title: parserKey,
+        key: parserKey,
+        label: parser.label ?? parserKey,
+        host: HOST,
+        example: schedule.today[0]?.group ?? "1.1",
         slots: schedule.today.map((g) => {
           return {
             title: g.group,

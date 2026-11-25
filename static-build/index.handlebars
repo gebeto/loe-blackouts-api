@@ -1,38 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Відключення ICS</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
-    
-    .list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .list a {
-      font-size: 20px;
-      padding: 20px;
-      text-decoration: none;
-      color: inherit;
-      border-radius: 4px;
-      border: 2px solid black;
-      display: block;
-    }
-  </style>
+  {{> styles}}
 </head>
 <body>
-  <div class="list">
-    {{#each cities}}
-      <a href="{{this.key}}/index.html">
-        {{this.label}}
-      </a>
-    {{/each}}
-  </div>
+  <main class="page">
+    <header class="cell header">
+      <div class="meta">
+        <span>LOE · ICS</span>
+        <span>webcal</span>
+      </div>
+      <h1>Відключення <span class="accent">світла</span></h1>
+      <p class="lead">Графік відключень у вашому календарі. Оберіть місто.</p>
+    </header>
+
+    <section class="cell section">
+      <div class="bar">
+        <span>Міста</span>
+        <span>{{cities.length}}</span>
+      </div>
+      {{#each cities}}
+        <a class="row" href="{{this.key}}/index.html" data-shortcut="{{this.shortcut}}">
+          <span class="kbd">{{this.shortcut}}</span>
+          <span class="row-label">{{this.label}}</span>
+          <span class="row-path">{{this.key}}/</span>
+          <span class="row-arrow">→</span>
+        </a>
+      {{/each}}
+    </section>
+
+    <pre class="panel"><span class="c"># підписка на календар</span>
+<span class="k">webcal</span>://<span class="t">{{host}}</span>/<span class="n">&lt;місто&gt;</span>/<span class="n">&lt;група&gt;</span><span class="s">.ics</span></pre>
+
+    <footer>MIT · <a href="https://github.com/gebeto/loe-blackouts-api">github.com/gebeto/loe-blackouts-api</a></footer>
+  </main>
+
+  <script>
+    document.addEventListener("keydown", (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const link = document.querySelector(`[data-shortcut="${e.key}"]`);
+      if (link) link.click();
+    });
+  </script>
 </body>
 </html>

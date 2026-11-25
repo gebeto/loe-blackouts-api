@@ -1,44 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Відключення {{title}} ICS</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
-    
-    .list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .list a {
-      font-size: 20px;
-      padding: 20px;
-      text-decoration: none;
-      color: inherit;
-      border-radius: 4px;
-      border: 2px solid black;
-      display: block;
-    }
-  </style>
+  <title>Відключення {{label}} ICS</title>
+  {{> styles}}
 </head>
 
 <body>
-  <div class="list">
-    <a href="../index.html">
-      ⬅️ Back
+  <main class="page">
+    <a class="back" href="../index.html">
+      <span class="kbd">Esc</span>
+      <span>← Усі міста</span>
     </a>
-    {{#each slots}}
-      <a href="{{this.url}}">
-        {{this.title}}
-      </a>
-    {{/each}}
-  </div>
+
+    <header class="cell header">
+      <div class="meta">
+        <span>LOE · ICS</span>
+        <span>{{key}}/</span>
+      </div>
+      <h1>{{label}} — <span class="accent">групи</span></h1>
+      <p class="lead">Натисніть на свою групу, щоб підписатися на календар відключень.</p>
+    </header>
+
+    <section class="cell section">
+      <div class="bar">
+        <span>Групи</span>
+        <span>{{slots.length}}</span>
+      </div>
+      <div class="grid">
+        {{#each slots}}
+          <a class="slot" href="{{this.url}}">
+            <span class="slot-title">{{this.title}}</span>
+            <span class="slot-label">підписатися</span>
+          </a>
+        {{/each}}
+      </div>
+    </section>
+
+    <pre class="panel"><span class="c"># webcal://{{host}}/{{key}}/{{example}}.ics</span>
+<span class="k">BEGIN</span>:<span class="t">VEVENT</span>
+<span class="k">SUMMARY</span>:<span class="s">Відключення {{example}}</span>
+<span class="k">DTSTART</span>:<span class="n">20261125T140000</span>
+<span class="k">DTEND</span>:<span class="n">20261125T180000</span>
+<span class="k">END</span>:<span class="t">VEVENT</span></pre>
+
+    <footer>MIT · <a href="https://github.com/gebeto/loe-blackouts-api">github.com/gebeto/loe-blackouts-api</a></footer>
+  </main>
+
+  <script>
+    document.addEventListener("keydown", (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === "Escape" || e.key === "Backspace") location.href = "../index.html";
+    });
+  </script>
 </body>
 
 </html>
