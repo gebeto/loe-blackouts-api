@@ -3,6 +3,10 @@ import { dayjs } from "../parsers";
 import * as ics from "ics";
 import { BlackoutGroup, BlackoutTimeRange } from "./types";
 
+// `timestamp` (DTSTAMP) is supported by ics but missing from its typings;
+// without it ics uses Date.now(), making every build output different
+type EventWithTimestamp = ics.EventAttributes & { timestamp?: ics.DateTime };
+
 function createEventForGroup(timeRange: BlackoutTimeRange) {
   const start = dayjs(timeRange.start)
     .tz("Europe/Kyiv")
@@ -15,9 +19,10 @@ function createEventForGroup(timeRange: BlackoutTimeRange) {
     .split("-")
     .map((a) => parseInt(a)) as ics.DateArray;
 
-  const event: ics.EventAttributes = {
+  const event: EventWithTimestamp = {
     uid: timeRange.start + "-" + timeRange.end + "@" + "loe-blackouts",
     startOutputType: "local",
+    timestamp: start,
     start: start,
     end: end,
     busyStatus: "FREE",
@@ -48,12 +53,13 @@ export function generateEvents(group: BlackoutGroup) {
       {
         uid: startObj.format("YYYY-MM-DD") + "@" + "loe-blackouts",
         startOutputType: "local",
+        timestamp: start,
         start: start,
         duration: { days: 1 },
         busyStatus: "FREE",
         transp: "TRANSPARENT",
         title: `${group.group} Світло НЕ відключається`,
-      } satisfies ics.EventAttributes,
+      } satisfies EventWithTimestamp,
     ];
   }
   return group.timeRanges.map((timeRange) => {
@@ -63,7 +69,7 @@ export function generateEvents(group: BlackoutGroup) {
 
 export function generateIcs(
   groupName: string,
-  events: ics.EventAttributes[],
+  events: EventWithTimestamp[],
 ): string {
   const result = ics.createEvents(events, {
     calName: `${groupName} Відключення світла`,
