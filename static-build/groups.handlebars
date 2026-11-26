@@ -21,22 +21,23 @@
         <span>{{key}}/</span>
       </div>
       <h1>{{label}} — <span class="accent">групи</span></h1>
-      <p class="lead">Натисніть на свою групу, щоб підписатися на календар відключень.</p>
+      <p class="lead">Графік відключень для кожної групи. Натисніть на свою групу, щоб підписатися на календар.</p>
     </header>
 
     <section class="cell section">
       <div class="bar">
-        <span>Групи</span>
+        <span>Групи<span id="dates"></span></span>
         <span>{{slots.length}}</span>
       </div>
-      <div class="grid">
-        {{#each slots}}
-          <a class="slot" href="{{this.url}}">
-            <span class="slot-title">{{this.title}}</span>
-            <span class="slot-label">підписатися</span>
-          </a>
-        {{/each}}
-      </div>
+      {{#each slots}}
+        <a class="row slot" href="{{this.url}}">
+          <span class="slot-title">{{this.title}}</span>
+          <span class="schedule" data-group="{{this.title}}">
+            <span class="on">завантаження…</span>
+          </span>
+          <span class="slot-label">підписатися →</span>
+        </a>
+      {{/each}}
     </section>
 
     <pre class="panel"><span class="c"># webcal://{{host}}/{{key}}/{{example}}.ics</span>
@@ -54,6 +55,58 @@
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === "Escape" || e.key === "Backspace") location.href = "../index.html";
     });
+
+    const formatTime = (iso) =>
+      new Date(iso).toLocaleTimeString("uk-UA", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    const formatDate = (date) => date.split("-").reverse().slice(0, 2).join(".");
+
+    const renderDay = (label, group) => {
+      const day = document.createElement("span");
+      day.className = "day";
+      const dayLabel = document.createElement("span");
+      dayLabel.className = "day-label";
+      dayLabel.textContent = label;
+      day.append(dayLabel);
+      if (group.timeRanges.length === 0) {
+        const on = document.createElement("span");
+        on.className = "on";
+        on.textContent = "світло є";
+        day.append(on);
+      }
+      for (const range of group.timeRanges) {
+        const el = document.createElement("span");
+        el.className = "range";
+        el.textContent = `${formatTime(range.start)}–${formatTime(range.end)}`;
+        day.append(el);
+      }
+      return day;
+    };
+
+    (async () => {
+      const cells = document.querySelectorAll(".schedule[data-group]");
+      try {
+        const response = await fetch("./schedule.json", { cache: "no-cache" });
+        const schedule = await response.json();
+        const dates = [schedule.today[0], schedule.tomorrow[0]]
+          .filter(Boolean)
+          .map((g) => formatDate(g.date));
+        if (dates.length) document.getElementById("dates").textContent = ` · ${dates.join(" / ")}`;
+        for (const cell of cells) {
+          const today = schedule.today.find((g) => g.group === cell.dataset.group);
+          const tomorrow = schedule.tomorrow.find((g) => g.group === cell.dataset.group);
+          cell.replaceChildren(
+            ...(today ? [renderDay("сьогодні", today)] : []),
+            ...(tomorrow ? [renderDay("завтра", tomorrow)] : []),
+          );
+        }
+      } catch (error) {
+        console.error(error);
+        for (const cell of cells) cell.textContent = "";
+      }
+    })();
   </script>
 </body>
 

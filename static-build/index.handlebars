@@ -23,10 +23,10 @@
         <span>{{cities.length}}</span>
       </div>
       {{#each cities}}
-        <a class="row" href="{{this.key}}/index.html" data-shortcut="{{this.shortcut}}">
+        <a class="row" href="{{this.key}}/" data-shortcut="{{this.shortcut}}">
           <span class="kbd">{{this.shortcut}}</span>
           <span class="row-label">{{this.label}}</span>
-          <span class="row-path">{{this.key}}/</span>
+          <span class="row-path">{{this.key}}</span>
           <span class="row-arrow">→</span>
         </a>
       {{/each}}
