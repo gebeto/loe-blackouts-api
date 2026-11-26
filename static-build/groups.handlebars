@@ -32,9 +32,7 @@
       {{#each slots}}
         <a class="row slot" href="{{this.url}}">
           <span class="slot-title">{{this.title}}</span>
-          <span class="schedule" data-group="{{this.title}}">
-            <span class="on">завантаження…</span>
-          </span>
+          <span class="schedule" data-group="{{this.title}}"></span>
           <span class="slot-label">підписатися →</span>
         </a>
       {{/each}}
@@ -94,17 +92,18 @@
           .filter(Boolean)
           .map((g) => formatDate(g.date));
         if (dates.length) document.getElementById("dates").textContent = ` · ${dates.join(" / ")}`;
-        for (const cell of cells) {
+        cells.forEach((cell, i) => {
+          cell.style.animationDelay = `${i * 30}ms`;
           const today = schedule.today.find((g) => g.group === cell.dataset.group);
           const tomorrow = schedule.tomorrow.find((g) => g.group === cell.dataset.group);
           cell.replaceChildren(
             ...(today ? [renderDay("сьогодні", today)] : []),
             ...(tomorrow ? [renderDay("завтра", tomorrow)] : []),
           );
-        }
+          cell.classList.add("loaded");
+        });
       } catch (error) {
         console.error(error);
-        for (const cell of cells) cell.textContent = "";
       }
     })();
   </script>

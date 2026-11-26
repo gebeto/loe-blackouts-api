@@ -172,6 +172,23 @@
     gap: 6px;
   }
 
+  .schedule.loaded {
+    animation: fade-slide 300ms ease-out both;
+  }
+
+  @keyframes fade-slide {
+    from {
+      opacity: 0;
+      transform: translateX(-6px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .schedule.loaded {
+      animation: none;
+    }
+  }
+
   .day {
     display: flex;
     flex-wrap: wrap;
