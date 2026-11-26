@@ -21,6 +21,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.deployed.outputs.cache-hit != 'true' }}
+      key: ${{ steps.deployed.outputs.cache-primary-key }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -36,15 +39,26 @@ jobs:
         env:
           HOST: gebeto.github.io/loe-blackouts-api
 
+      - name: Check if this build is already deployed
+        id: deployed
+        uses: actions/cache/restore@v6
+        with:
+          path: artifact.tar
+          key: pages-${{ hashFiles('dist/**') }}
+          lookup-only: true
+
       - name: Setup Pages
+        if: steps.deployed.outputs.cache-hit != 'true'
         uses: actions/configure-pages@v6
       - name: Upload artifact
+        if: steps.deployed.outputs.cache-hit != 'true'
         uses: actions/upload-pages-artifact@v5
         with:
           path: "./dist"
 
   deploy:
     needs: build
+    if: needs.build.outputs.changed == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -52,3 +66,13 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
+
+      - name: Download deployed artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: github-pages
+      - name: Mark this build as deployed
+        uses: actions/cache/save@v6
+        with:
+          path: artifact.tar
+          key: ${{ needs.build.outputs.key }}
